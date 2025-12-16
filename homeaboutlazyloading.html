@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>AngularJS Routing Example</title>
+
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular-route.min.js"></script>
+</head>
+
+<body>
+
+<h2>AngularJS Routing Example</h2>
+
+<a href="#!/">Home</a> |
+<a href="#!/about">About</a> |
+<a href="#!/contact">Contact</a>
+
+<hr>
+
+<div ng-view></div>
+
+<script>
+/* =========================
+   App Module
+========================= */
+var app = angular.module("myApp", ["ngRoute"]);
+
+/* =========================
+   Controller (Pre-Registered)
+========================= */
+app.controller("AboutCtrl", function($scope) {
+    $scope.title = "About Page";
+    $scope.info = "This data is loaded only when About route is visited.";
+});
+
+/* =========================
+   Routing Configuration
+========================= */
+app.config(function($routeProvider) {
+
+    $routeProvider
+
+    .when("/", {
+        template: "<h3>Home Page</h3><p>Welcome to Home.</p>"
+    })
+
+    .when("/contact", {
+        template: "<h3>Contact Page</h3><p>Email: support@example.com</p>"
+    })
+
+    .when("/about", {
+        template: `
+            <div ng-controller="AboutCtrl">
+                <h3>{{ title }}</h3>
+                <p>{{ info }}</p>
+            </div>
+        `,
+        resolve: {
+            delay: function($q, $timeout) {
+                var defer = $q.defer();
+                // Simulate lazy loading delay
+                $timeout(function() {
+                    defer.resolve();
+                }, 500);
+                return defer.promise;
+            }
+        }
+    })
+
+    .otherwise({
+        redirectTo: "/"
+    });
+
+});
+</script>
+
+</body>
+</html>
