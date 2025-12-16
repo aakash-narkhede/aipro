@@ -1,0 +1,92 @@
+Sequelize ORM – CRUD Operations
+🔹 Install Required Packages
+npm init -y
+npm install sequelize mysql2 express
+🔹 Basic Project Structure
+sequelize-crud/
+ ├── models/
+ │   └── User.js
+ ├── config/
+ │   └── db.js
+ ├── server.js
+ └── package.json
+🔹 Database Connection (config/db.js)
+const { Sequelize } = require('sequelize');
+
+const sequelize = new Sequelize(
+    'testdb',     // database name
+    'root',       // username
+    'password',   // password
+    {
+        host: 'localhost',
+        dialect: 'mysql'
+    }
+);
+
+module.exports = sequelize;
+🔹 Define Model (models/User.js)
+const { DataTypes } = require('sequelize');
+const sequelize = require('../config/db');
+
+const User = sequelize.define('User', {
+    name: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    email: {
+        type: DataTypes.STRING,
+        unique: true,
+        allowNull: false
+    },
+    age: {
+        type: DataTypes.INTEGER
+    }
+});
+
+module.exports = User;
+🔹 Sync Database & Start Server (server.js)
+const express = require('express');
+const sequelize = require('./config/db');
+const User = require('./models/User');
+
+const app = express();
+app.use(express.json());
+
+// Sync database
+sequelize.sync()
+.then(() => console.log('Database synced'))
+.catch(err => console.log(err));
+
+app.listen(3000, () => {
+    console.log('Server running on port 3000');
+});
+🔁 CRUD Operations Using Sequelize
+1️⃣ CREATE (Insert Record)
+app.post('/users', async (req, res) => {
+    const user = await User.create(req.body);
+    res.json(user);
+});
+2️⃣ READ (Fetch Records)
+app.get('/users', async (req, res) => {
+    const users = await User.findAll();
+    res.json(users);
+});
+🔹 Get User by ID
+app.get('/users/:id', async (req, res) => {
+    const user = await User.findByPk(req.params.id);
+    res.json(user);
+});
+3️⃣ UPDATE (Modify Record)
+app.put('/users/:id', async (req, res) => {
+    await User.update(req.body, {
+        where: { id: req.params.id }
+    });
+    res.json({ message: 'User Updated' });
+});
+4️⃣ DELETE (Remove Record)
+app.delete('/users/:id', async (req, res) => {
+    await User.destroy({
+        where: { id: req.params.id }
+    });
+    res.json({ message: 'User Deleted' });
+});
