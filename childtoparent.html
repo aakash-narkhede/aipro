@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html ng-app="myApp">
+<head>
+    <meta charset="UTF-8">
+    <title>Child to Parent Communication</title>
+
+    <!-- AngularJS CDN -->
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.0/angular.min.js"></script>
+
+    <style>
+        body {
+            font-family: Arial;
+            margin: 30px;
+        }
+        .box {
+            border: 1px solid #333;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+
+<body ng-controller="ParentCtrl">
+
+    <h2>Parent Component</h2>
+
+    <p><b>Message from Child:</b> {{ receivedMsg }}</p>
+
+    <!-- Child Component -->
+    <child-comp send-data="getMessage(data)"></child-comp>
+
+<script>
+/* =========================
+   App Module
+========================= */
+angular.module('myApp', [])
+
+/* =========================
+   Parent Controller
+========================= */
+.controller('ParentCtrl', function($scope) {
+
+    $scope.receivedMsg = "No message yet";
+
+    // Function called by child
+    $scope.getMessage = function(data) {
+        $scope.receivedMsg = data;
+    };
+})
+
+/* =========================
+   Child Directive
+========================= */
+.directive('childComp', function() {
+    return {
+        restrict: 'E',
+        scope: {
+            sendData: '&'
+        },
+        template: `
+            <div class="box">
+                <h3>Child Component</h3>
+                <button ng-click="sendData({ data: 'Hello Parent! Message from Child.' })">
+                    Send Message to Parent
+                </button>
+            </div>
+        `
+    };
+});
+</script>
+
+</body>
+</html>
