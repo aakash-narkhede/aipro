@@ -9,10 +9,12 @@ mongo-crud/
 🔹 Connect MongoDB (server.js)
 const express = require('express');
 const mongoose = require('mongoose');
-
+const cors = require('cors');
 const app = express();
 app.use(express.json());
-
+app.use(cors({
+    origin: '*',   // allow all frontends (dev)
+}));
 // MongoDB connection
 mongoose.connect('mongodb://127.0.0.1:27017/mydb')
 .then(() => console.log('MongoDB Connected'))
@@ -76,3 +78,79 @@ app.delete('/users/:id', async (req, res) => {
     res.send({ message: 'User Deleted' });
 });
 
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>MongoDB CRUD Frontend</title>
+    <style>
+        body { font-family: Arial; }
+        input, button { margin: 5px; }
+    </style>
+</head>
+<body>
+
+<h2>MongoDB User Management</h2>
+
+<input id="name" placeholder="Name">
+<input id="email" placeholder="Email">
+<input id="age" placeholder="Age">
+<button onclick="addUser()">Add User</button>
+
+<h3>Users</h3>
+<ul id="users"></ul>
+
+<script>
+const API_URL = 'http://localhost:3000/users';
+
+/* =========================
+   CREATE
+========================= */
+function addUser() {
+    fetch(API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            name: name.value,
+            email: email.value,
+            age: age.value
+        })
+    }).then(() => loadUsers());
+}
+
+/* =========================
+   READ
+========================= */
+function loadUsers() {
+    fetch(API_URL)
+    .then(res => res.json())
+    .then(data => {
+        users.innerHTML = '';
+        data.forEach(user => {
+            users.innerHTML += `
+                <li>
+                    ${user.name} (${user.email})
+                    <button onclick="deleteUser('${user._id}')">
+                        Delete
+                    </button>
+                </li>
+            `;
+        });
+    });
+}
+
+/* =========================
+   DELETE
+========================= */
+function deleteUser(id) {
+    fetch(`${API_URL}/${id}`, {
+        method: 'DELETE'
+    }).then(() => loadUsers());
+}
+
+// Load users initially
+loadUsers();
+</script>
+
+</body>
+</html>
